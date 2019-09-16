@@ -3,6 +3,7 @@
 ## Overview(概要)
 
 This repository shows digital caliper application on STM32.
+
 STM32を使用した自作デジタルノギスです。リニアエンコーダ部から自作しています。
 
 ![hall sensor](./img/mov.gif)
@@ -19,20 +20,24 @@ STM32を使用した自作デジタルノギスです。リニアエンコーダ
 ### Position detection(位置検出)
 
 The position is calculated by sensing magnetic field of the sheet magnet with Hall sensors.
+
 シート磁石の磁界をホールセンサで測定することで、位置を検出しています。
 
 ![hall sensor](./img/img1.png)
 
 Sheet magnet have alternating N-S blocks. When a linear output Hall sensor moves on a sheet magnet, nearly sine wave is output.
 Assuming: Let y be the sensor output value and θ be a position of the sensor. Then <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;y=\sin\theta" />.
+
 シート磁石は、N極とS極が交互に並んでおり、リニア出力のホールセンサを滑らせるとsin波に似た信号が出力されます。そこで、センサ出力をy、位置をθとして、<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;y=\sin\theta" />に従うと仮定します。
 
 Now, install the two sensors with their positions shifted so that the output <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" />as following.
+
 いま、2個のセンサを、位置をズラして設置し、出力<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" />が次に従うようにします。
 
 ![region](./img/img2.png)
 
 Then, the graph area can be divided into A to D regions as shown in upper figure depending on <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" />.
+
 このとき、<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" />の値によって、図のように領域A,B,C,Dに分けることができます。
 
 * A：<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;y_1&space;\geq&space;0,&space;y_2\geq0" />
@@ -43,16 +48,19 @@ Then, the graph area can be divided into A to D regions as shown in upper figure
 
 Next, consider how to detect the moving direction and calculate the rough position.
 Let <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" /> be the number of passes through the A-D region. Add 1 to <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" /> if the region changes forward as A→B→C→D→A and subtract 1 from <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" /> if the region changes reverse as A→D→C→B→A. Where <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;p" /> is the magnet pitch (between N-N pole), the rough position <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta_{rough}" /> is as follows.
+
 次に、方向検出し、大まかな位置を計算します。領域を周回する回数を<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" />とし、A→B→C→D→A と正転すれば<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" />に1を加え、A→D→C→B→Aと逆転すれば<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;N" />に1を減じます。1周期分の磁石ピッチ(N極とN極の間)を<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;p" />とすれば、大まかな位置<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta_{rough}" />は、次の通りです。
 
 <img src="https://latex.codecogs.com/gif.latex?\large&space;\theta_{rough}&space;=&space;Np" />
 
 In addition, calculate the accrate position <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta_{acc}" /> from <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;y_1,&space;y_2" />. Where <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;0&space;\leq&space;\theta_{acc}&space;\leq&space;2\pi" />
+
 さらに、<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;y_1,&space;y_2" />から正確な位置<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta_{acc}" />を計算します。ただし、<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;0&space;\leq&space;\theta_{acc}&space;\leq&space;2\pi" />の範囲で考えます。
 
 <img src="https://latex.codecogs.com/gif.latex?\large&space;\theta_{acc}&space;=&space;\tan^{-1}&space;\left(\frac{y_1}{y_2}&space;\right)" />
 
 Therefore, position <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" />is as follows.
+
 以上より、位置<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" />は次のように求まります。
 
 <img src="https://latex.codecogs.com/gif.latex?\large&space;\theta&space;=&space;\theta_{rough}&plus;\theta_{acc}" />
@@ -60,17 +68,20 @@ Therefore, position <img src="https://latex.codecogs.com/gif.latex?\inline&space
 ### Position error compensation(位置ずれ補償)
 
 Ideally, the sensors output values are <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\sin\theta,&space;\cos\theta" />, but the actual sensor output has error because of the position error <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\delta" /> of sensors. Hence:
+
 センサ出力が<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\sin\theta,&space;\cos\theta" />となるのが理想ですが、実際のセンサ位置にはずれ<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\delta" />が存在するので、次のように書けます。
 
 <img src="https://latex.codecogs.com/gif.latex?\large&space;\begin{align*}&space;y_1&space;&=&space;\sin\theta\\&space;y_2&space;&=&space;\cos\left(&space;\theta&space;&plus;&space;\delta&space;\right&space;)&space;\end{align*}" />
 
 If we estimate <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\delta" /> from <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" /> and calculate <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" /> from <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\delta" /> , the accracy of <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" /> is improved. Please refer to [this tweet](https://twitter.com/keshinomi_88pro/status/1157645938023792640) (written in japanese)
+
 <img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;(y_1,&space;y_2)" />から<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\delta" />を推定し<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" />を求めると、<img src="https://latex.codecogs.com/gif.latex?\inline&space;\large&space;\theta" />の精度向上に寄与します。具体的な方法論は[ツイート](https://twitter.com/keshinomi_88pro/status/1157645938023792640)の通りです。
 
 
 ## Hardware
 
 See [Schematic](./hardware/schematic/schematic.pdf), and [3Dmodel](./hardware/3dmodel/model.stp).
+
 回路図は[こちら](./hardware/schematic/schematic.pdf)、3Dモデルは[こちら](./hardware/3dmodel/model.stp)。
 
 ## Software
