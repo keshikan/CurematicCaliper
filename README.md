@@ -8,10 +8,11 @@ STM32を使用した自作デジタルノギスです。リニアエンコーダ
 
 ![hall sensor](./img/mov.gif)
 
-## features(特徴)
+## Features(特徴)
 
 * 3D printed body (本体は3Dプリンタ製)
 * 0.01mm resolution (分解能0.01mm)
+* Self calibration (自己校正機能)
 * Dual power supplies (二系統の電源に対応) :CR2016 or USB Type-C
 * Data output function via USB (USB経由で測定値を出力可能)
 
